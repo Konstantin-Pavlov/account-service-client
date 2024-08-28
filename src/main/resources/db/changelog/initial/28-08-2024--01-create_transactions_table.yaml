@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: create table for transactions
+      author: K
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: transactions
+      changes:
+        - createTable:
+            tableName: transactions
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: account_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: amount
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: transactions
+            baseColumnNames: account_id
+            constraintName: fk_account_id
+            referencedTableName: accounts
+            referencedColumnNames: id
+            onDelete: CASCADE

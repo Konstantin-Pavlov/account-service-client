@@ -1,0 +1,28 @@
+databaseChangeLog:
+  - changeSet:
+      id: create table for accounts
+      author: K
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: accounts
+      changes:
+        - createTable:
+            tableName: accounts
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: balance
+                  type: NUMERIC(20, 2)
+              - column:
+                  name: last_updated
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+

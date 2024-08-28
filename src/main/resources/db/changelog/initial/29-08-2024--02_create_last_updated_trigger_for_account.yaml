@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2
+      author: K
+      changes:
+        - sql:
+            splitStatements: false
+            stripComments: true
+            sql: |
+              CREATE OR REPLACE FUNCTION set_last_updated()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                  IF NEW.last_updated IS NULL THEN
+                      NEW.last_updated := CURRENT_TIMESTAMP;
+                  END IF;
+                  RETURN NEW;
+              END;
+              $$ LANGUAGE plpgsql;
+
+              CREATE TRIGGER set_last_updated_trigger
+              BEFORE INSERT ON accounts
+              FOR EACH ROW
+              EXECUTE FUNCTION set_last_updated();

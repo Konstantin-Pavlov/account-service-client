@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: account-service-client
+
+    # ------------- DataBases
+  datasource:
+    url: jdbc:postgresql://localhost:5436/account_service
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    properties:
+      hibernate:
+        ddl-auto: validate
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show-sql: true
+        format_sql: true
+
+  output:
+    ansi:
+      enabled: always
+
+  liquibase:
+    change-log: classpath:/db/changelog/master.yaml
+
+logging:
+  level:
+    root: info
+    org:
+      springframework:
+        security: debug
+
+  file:
+    name: logs/spring.log
+
+server:
+  port: 8071
+
+app:
+  desired_account_number: 100

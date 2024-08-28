@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: create table for statistics
+      author: K
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: statistics
+      changes:
+        - createTable:
+            tableName: statistics
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: method_name
+                  type: VARCHAR(50)
+              - column:
+                  name: request_count
+                  type: INTEGER
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: total_request_count
+                  type: INTEGER
+                  defaultValue: "0"
+                  constraints:
+                    nullable: false
+              - column:
+                  name: timestamp
+                  type: TIMESTAMP
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+
