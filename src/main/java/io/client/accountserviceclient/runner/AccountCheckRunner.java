@@ -1,6 +1,5 @@
 package io.client.accountserviceclient.runner;
 
-import io.client.accountserviceclient.config.ClientProperties;
 import io.client.accountserviceclient.entity.Account;
 import io.client.accountserviceclient.server.MockAccountServer;
 import io.client.accountserviceclient.service.AccountService;
@@ -13,6 +12,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -73,19 +73,19 @@ public class AccountCheckRunner implements ApplicationRunner {
                 wCountPool.shutdown();
             }, simulationTime, TimeUnit.SECONDS);
 
-//        LocalDateTime start = LocalDateTime.now();
-//        LocalDateTime end = start.plusSeconds(simulationTime);
+//            LocalDateTime start = LocalDateTime.now();
+//            LocalDateTime end = start.plusSeconds(simulationTime);
 //        for (; start.isBefore(end); start = start.plusSeconds(1)) {
 //            submitGetAmountTasksInto(rCountPool, idList, rCount);
 //            submitAddAmountTasksInto(wCountPool, idList, wCount);
 //        }
             int iterationCounter = 0;
-//        while (start.isBefore(end)) {
+//            while (start.isBefore(end)) {
             while (!isShutDown) {
                 log.info(ConsoleColors.ANSI_WHITE_BACKGROUND + "iteration: {}" + ConsoleColors.RESET, ++iterationCounter);
                 submitGetAmountTasksInto(rCountPool, idList, rCount);
                 submitAddAmountTasksInto(wCountPool, idList, wCount);
-//            start = start.plus(100, ChronoUnit.MILLIS); // Increment by 100 milliseconds
+//                start = start.plus(100, ChronoUnit.MILLIS); // Increment by 100 milliseconds
             }
 
 
@@ -126,10 +126,11 @@ public class AccountCheckRunner implements ApplicationRunner {
                     LocalDateTime.now());
 
             IntStream.range(0, rCount)
-                    .mapToObj(i -> makeRCountTask(
-                            idList.get(random.nextInt(idList.size())).getId())
+                    .mapToObj(i -> new CustomTask(
+                            i,
+                            makeRCountTask(idList.get(random.nextInt(idList.size())).getId()))
                     )
-                    .forEach(task -> tryToSubmit(rCountPool, task));
+                    .forEach(task -> tryToSubmit(rCountPool, task, task.getId()));
         }
     }
 
@@ -141,10 +142,14 @@ public class AccountCheckRunner implements ApplicationRunner {
                     LocalDateTime.now());
 
             IntStream.range(0, wCount)
-                    .mapToObj(i -> makeWCountTask(
-                            idList.get(random.nextInt(idList.size())).getId())
+                    .mapToObj(i -> new CustomTask(
+                            i,
+                            makeWCountTask(idList.get(random.nextInt(idList.size())).getId()))
                     )
-                    .forEach(task -> tryToSubmit(wCountPool, task));
+                    .forEach(task -> {
+                        tryToSubmit(wCountPool, task, task.getId());
+
+                    });
         }
     }
 
@@ -162,10 +167,17 @@ public class AccountCheckRunner implements ApplicationRunner {
         };
     }
 
-    private void tryToSubmit(ExecutorService pool, Runnable task) {
+    private void tryToSubmit(ExecutorService pool, Runnable task, int taskId) {
         if (!isShutDown && !pool.isShutdown()) {
             try {
-                pool.submit(task);
+                pool.submit(new CustomTask(taskId, () -> {
+                    log.info(ConsoleColors.GREEN_BACKGROUND +
+                                    "task with {} is being executed by thread {}" +
+                                    ConsoleColors.RESET,
+                            task.toString(),
+                            Thread.currentThread().getName());
+                    task.run();
+                }));
             } catch (RejectedExecutionException e) {
                 log.warn(ConsoleColors.RED_BACKGROUND +
                                 "Task submission rejected: {}" +

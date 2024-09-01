@@ -15,7 +15,7 @@ public class MockAccountServer {
     public Long getAmount(Integer id) {
         getAmountCounter.incrementAndGet();
         log.info(ConsoleColors.BLUE +
-                        "Getting amount for ID: {}" +
+                        "Getting amount for account ID: {}" +
                         ConsoleColors.RESET, id);
         // Simulate getting amount
         return 100L; // Mocked value
@@ -24,7 +24,7 @@ public class MockAccountServer {
     public void addAmount(Integer id, Long value) {
         addAmountCounter.incrementAndGet();
         log.info(ConsoleColors.GREEN_BACKGROUND +
-                "Adding amount {} for ID: {}" +
+                "Adding amount {} for account ID: {}" +
                 ConsoleColors.RESET, value, id);
         // Simulate adding amount
     }
