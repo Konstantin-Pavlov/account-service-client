@@ -26,9 +26,9 @@ spring:
 logging:
   level:
     root: info
-    org:
-      springframework:
-        security: debug
+#    org:
+#      springframework:
+#        security: debug
 
   file:
     name: logs/spring.log
@@ -38,3 +38,11 @@ server:
 
 app:
   desired_account_number: 100
+
+client:
+  rCount: 7
+  wCount: 3
+#  idList: [1, 2, 3, 4, 5]
+  simulationTime: 2
+  idListLength: 50
+
