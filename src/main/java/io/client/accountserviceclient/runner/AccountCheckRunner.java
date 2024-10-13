@@ -3,6 +3,7 @@ package io.client.accountserviceclient.runner;
 import io.client.accountserviceclient.entity.Account;
 import io.client.accountserviceclient.server.MockAccountServer;
 import io.client.accountserviceclient.service.AccountService;
+import io.client.accountserviceclient.service.impl.MessageSender;
 import io.client.accountserviceclient.util.ConsoleColors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -29,6 +31,8 @@ public class AccountCheckRunner implements ApplicationRunner {
     private final AccountService accountService;
     private final MockAccountServer accountServer;
     private final Random random = new Random();
+
+    private final MessageSender messageSender;
 
     @Value("${app.desired_account_number}")
     private int desiredAccountNumber;
@@ -49,6 +53,19 @@ public class AccountCheckRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
+//        start();
+
+//        for (int i = 0; i < 10; i++) {
+//            messageSender.send(i + ". wow");
+//        }
+
+        Integer accountId = 12;  // Example account ID
+        BigDecimal balance = messageSender.sendAndReceive(accountId);
+        log.info("Received balance for account {}: {}", accountId, balance);
+
+    }
+
+    private void start() throws InterruptedException {
         generateAccounts();
 //        startSimulation();
         List<Account> idList = initalizeIdList();
@@ -85,6 +102,7 @@ public class AccountCheckRunner implements ApplicationRunner {
                 log.info(ConsoleColors.ANSI_WHITE_BACKGROUND + "iteration: {}" + ConsoleColors.RESET, ++iterationCounter);
                 submitGetAmountTasksInto(rCountPool, idList, rCount);
                 submitAddAmountTasksInto(wCountPool, idList, wCount);
+                sleep();
 //                start = start.plus(100, ChronoUnit.MILLIS); // Increment by 100 milliseconds
             }
 
@@ -115,7 +133,6 @@ public class AccountCheckRunner implements ApplicationRunner {
 //
 //        rCountPool.shutdown();
 //        wCountPool.shutdown();
-
     }
 
     private void submitGetAmountTasksInto(ExecutorService rCountPool, List<Account> idList, int rCount) {
@@ -251,54 +268,54 @@ public class AccountCheckRunner implements ApplicationRunner {
     }
 
     // old version method
-    private void startSimulation() throws InterruptedException {
-        List<Account> idList = initalizeIdList();
-        try (
-                ExecutorService executorServiceRCount = Executors.newFixedThreadPool(rCount);
-                ExecutorService executorServiceWCount = Executors.newFixedThreadPool(wCount);
-                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1) // use this?
-        ) {
-
-            for (int i = 0; i < rCount; i++) {
-                executorServiceRCount.submit(() -> {
-                    while (!Thread.currentThread().isInterrupted()) {
-                        for (Account account : idList) {
-                            accountServer.getAmount(account.getId());
-                            sleep();
-                        }
-                    }
-                });
-            }
-
-            for (int i = 0; i < wCount; i++) {
-                executorServiceWCount.submit(() -> {
-                    while (!Thread.currentThread().isInterrupted()) {
-                        for (Account account : idList) {
-                            accountServer.addAmount(account.getId(), 10L);
-                            sleep();
-                        }
-                    }
-                });
-            }
-
-            // Schedule a task to shut down the executor service after 5 seconds
-            scheduler.schedule(() -> {
-                log.info(ConsoleColors.RED_BACKGROUND +
-                                "Shutting down the executor service after {} seconds (set on application.yaml)" +
-                                ConsoleColors.RESET,
-                        simulationTime
-                );
-                executorServiceRCount.shutdownNow();
-                executorServiceWCount.shutdownNow();
-            }, simulationTime, TimeUnit.SECONDS);
-
-            // Wait for the executor service to terminate, with a buffer of 1 second
-            executorServiceRCount.awaitTermination(16, TimeUnit.SECONDS);
-            scheduler.shutdown();
-        }
-        // Log the counters
-        log.info("Total getAmount calls: {}", accountServer.getGetAmountCount());
-        log.info("Total addAmount calls: {}", accountServer.getAddAmountCount());
-    }
+//    private void startSimulation() throws InterruptedException {
+//        List<Account> idList = initalizeIdList();
+//        try (
+//                ExecutorService executorServiceRCount = Executors.newFixedThreadPool(rCount);
+//                ExecutorService executorServiceWCount = Executors.newFixedThreadPool(wCount);
+//                ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1) // use this?
+//        ) {
+//
+//            for (int i = 0; i < rCount; i++) {
+//                executorServiceRCount.submit(() -> {
+//                    while (!Thread.currentThread().isInterrupted()) {
+//                        for (Account account : idList) {
+//                            accountServer.getAmount(account.getId());
+//                            sleep();
+//                        }
+//                    }
+//                });
+//            }
+//
+//            for (int i = 0; i < wCount; i++) {
+//                executorServiceWCount.submit(() -> {
+//                    while (!Thread.currentThread().isInterrupted()) {
+//                        for (Account account : idList) {
+//                            accountServer.addAmount(account.getId(), 10L);
+//                            sleep();
+//                        }
+//                    }
+//                });
+//            }
+//
+//            // Schedule a task to shut down the executor service after 5 seconds
+//            scheduler.schedule(() -> {
+//                log.info(ConsoleColors.RED_BACKGROUND +
+//                                "Shutting down the executor service after {} seconds (set on application.yaml)" +
+//                                ConsoleColors.RESET,
+//                        simulationTime
+//                );
+//                executorServiceRCount.shutdownNow();
+//                executorServiceWCount.shutdownNow();
+//            }, simulationTime, TimeUnit.SECONDS);
+//
+//            // Wait for the executor service to terminate, with a buffer of 1 second
+//            executorServiceRCount.awaitTermination(16, TimeUnit.SECONDS);
+//            scheduler.shutdown();
+//        }
+//        // Log the counters
+//        log.info("Total getAmount calls: {}", accountServer.getGetAmountCount());
+//        log.info("Total addAmount calls: {}", accountServer.getAddAmountCount());
+//    }
 
 }

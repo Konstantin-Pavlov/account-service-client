@@ -8,13 +8,20 @@ spring:
     driver-class-name: org.postgresql.Driver
     username: postgres
     password: postgres
+
   jpa:
     properties:
       hibernate:
         ddl-auto: validate
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        dialect: org.hibernate.dialect.PostgreSQLDialect  # PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
         show-sql: true
         format_sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
   output:
     ansi:
@@ -35,6 +42,13 @@ logging:
 
 server:
   port: 8071
+
+queue:
+  name: hello
+  request:
+    name: get-amount-request-queue
+  response:
+    name: get-amount-response-queue
 
 app:
   desired_account_number: 100
