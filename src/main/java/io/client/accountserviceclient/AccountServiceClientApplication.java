@@ -14,6 +14,7 @@ import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @SpringBootApplication
@@ -24,11 +25,13 @@ public class AccountServiceClientApplication {
     private RabbitAdmin rabbitAdmin;
 
     @Autowired
-    private Queue queue;
+    private List<Queue> allQueues;
 
     @PostConstruct
     public void declareQueue() {
-        rabbitAdmin.declareQueue(queue);
+        for (Queue queue : allQueues) {
+            rabbitAdmin.declareQueue(queue);
+        }
     }
 
 //    private final static String QUEUE_NAME = "hello";

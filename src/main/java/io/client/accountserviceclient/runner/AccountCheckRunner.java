@@ -1,5 +1,7 @@
 package io.client.accountserviceclient.runner;
 
+import dto.UpdateAccountBalanceRequest;
+import exception.AccountNotFoundException;
 import io.client.accountserviceclient.entity.Account;
 import io.client.accountserviceclient.server.MockAccountServer;
 import io.client.accountserviceclient.service.AccountService;
@@ -14,7 +16,6 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -60,8 +61,19 @@ public class AccountCheckRunner implements ApplicationRunner {
 //        }
 
         Integer accountId = 12;  // Example account ID
-        BigDecimal balance = messageSender.sendAndReceive(accountId);
+        BigDecimal balance = messageSender.getAmount(accountId);
         log.info("Received balance for account {}: {}", accountId, balance);
+
+        for (int i = 0; i < 10; i++) {
+            try {
+                UpdateAccountBalanceRequest addAmount = messageSender.addAmount(i, BigDecimal.valueOf(10));
+                log.info("updated: {}", addAmount.toString());
+            } catch (AccountNotFoundException e) {
+                log.error(e.getMessage());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
+        }
 
     }
 
