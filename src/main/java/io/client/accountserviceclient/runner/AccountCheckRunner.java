@@ -54,26 +54,26 @@ public class AccountCheckRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws InterruptedException {
-//        start();
+        start();
 
 //        for (int i = 0; i < 10; i++) {
 //            messageSender.send(i + ". wow");
 //        }
 
-        Integer accountId = 12;  // Example account ID
-        BigDecimal balance = messageSender.getAmount(accountId);
-        log.info("Received balance for account {}: {}", accountId, balance);
+//        Integer accountId = 12;  // Example account ID
+//        BigDecimal balance = messageSender.getAmount(accountId);
+//        log.info("Received balance for account {}: {}", accountId, balance);
 
-        for (int i = 0; i < 10; i++) {
-            try {
-                UpdateAccountBalanceRequest addAmount = messageSender.addAmount(i, BigDecimal.valueOf(10));
-                log.info("updated: {}", addAmount.toString());
-            } catch (AccountNotFoundException e) {
-                log.error(e.getMessage());
-            } catch (Exception e) {
-                log.error(e.getMessage(), e);
-            }
-        }
+//        for (int i = 0; i < 10; i++) {
+//            try {
+//                UpdateAccountBalanceRequest addAmount = messageSender.addAmount(i, BigDecimal.valueOf(10));
+//                log.info("updated: {}", addAmount.toString());
+//            } catch (AccountNotFoundException e) {
+//                log.error(e.getMessage());
+//            } catch (Exception e) {
+//                log.error(e.getMessage(), e);
+//            }
+//        }
 
     }
 
@@ -184,14 +184,24 @@ public class AccountCheckRunner implements ApplicationRunner {
 
     private Runnable makeRCountTask(int accountId) {
         return () -> {
-            accountServer.getAmount(accountId);
+//            accountServer.getAmount(accountId);
+            BigDecimal balance = messageSender.getAmount(accountId);
+            log.info("Received balance for account {}: {}", accountId, balance);
             sleep();
         };
     }
 
     private Runnable makeWCountTask(int accountId) {
         return () -> {
-            accountServer.addAmount(accountId, 10L);
+//            accountServer.addAmount(accountId, 10L);
+            try {
+                UpdateAccountBalanceRequest addAmount = messageSender.addAmount(accountId, BigDecimal.valueOf(10));
+                log.info("updated: {}", addAmount.toString());
+            } catch (AccountNotFoundException e) {
+                log.error(e.getMessage());
+            } catch (Exception e) {
+                log.error(e.getMessage(), e);
+            }
             sleep();
         };
     }
