@@ -138,6 +138,7 @@ public class AccountCheckRunner implements ApplicationRunner {
             }
             scheduler.shutdownNow();
             // Log the counters
+            // todo - fix
             log.info("Total getAmount calls: {}", accountServer.getGetAmountCount());
             log.info("Total addAmount calls: {}", accountServer.getAddAmountCount());
         }
